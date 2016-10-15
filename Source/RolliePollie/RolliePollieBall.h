@@ -36,6 +36,9 @@ public:
 	UPROPERTY(EditAnywhere, Category=Ball)
 	float RollTorque;
 
+	UPROPERTY(EditAnywhere, Category=Ball)
+	float IdealTurnRadius;
+
 	/** Indicates whether we can currently jump, use to prevent double jumping */
 	bool bCanJump;
 
