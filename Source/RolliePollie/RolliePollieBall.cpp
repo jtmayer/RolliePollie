@@ -53,7 +53,7 @@ ARolliePollieBall::ARolliePollieBall()
     PrimaryActorTick.bStartWithTickEnabled = true;
     PrimaryActorTick.bCanEverTick = true;
 
-    IdealTurnRadius = 150;
+    IdealTurnRadius = 50;
     
     BallForwardVector = FVector::ForwardVector;
 }
@@ -103,6 +103,13 @@ void ARolliePollieBall::MoveForward(float Val)
     	Ball->AddTorque(Val *
     			RollTorque *
     		        BallRightVector);
+    }
+
+    if (Val < 0)
+    {
+	Ball->AddTorque(Val *
+			RollTorque *
+			Ball->GetPhysicsAngularVelocity().GetSafeNormal(100));
     }
 }
 
