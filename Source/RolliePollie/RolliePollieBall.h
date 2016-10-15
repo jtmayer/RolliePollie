@@ -20,6 +20,11 @@ class ARolliePollieBall : public APawn
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Ball, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* Camera;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Ball, meta = (AllowPrivateAccess = "true"))
+	FVector BallForwardVector;
+	
+	FVector& GetForwardVector();
+
 public:
 	ARolliePollieBall();
 
@@ -35,7 +40,8 @@ public:
 	bool bCanJump;
 
 protected:
-
+	void Tick(float DeltaTime);
+	
 	/** Called for side to side input */
 	void MoveRight(float Val);
 

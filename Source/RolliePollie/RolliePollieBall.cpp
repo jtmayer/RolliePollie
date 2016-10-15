@@ -3,6 +3,17 @@
 #include "RolliePollie.h"
 #include "RolliePollieBall.h"
 
+FVector& ARolliePollieBall::GetForwardVector()
+{
+    if (Ball->GetPhysicsLinearVelocity() != FVector::ZeroVector)
+    {
+	BallForwardVector = FVector::VectorPlaneProject(Ball->GetPhysicsLinearVelocity(),
+							FVector::UpVector).GetUnsafeNormal();
+    }
+	
+    return BallForwardVector;
+}
+
 ARolliePollieBall::ARolliePollieBall()
 {
     static ConstructorHelpers::FObjectFinder<UStaticMesh> BallMesh(TEXT("/Game/Rolling/Meshes/BallMesh.BallMesh"));
@@ -38,6 +49,10 @@ ARolliePollieBall::ARolliePollieBall()
     RollTorque = 50000000.0f;
     JumpImpulse = 350000.0f;
     bCanJump = true; // Start being able to jump
+
+    SetActorTickEnabled(true);
+
+    BallForwardVector = FVector::ForwardVector;
 }
 
 
@@ -50,18 +65,35 @@ void ARolliePollieBall::SetupPlayerInputComponent(class UInputComponent* PlayerI
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ARolliePollieBall::Jump);
 }
 
+void ARolliePollieBall::Tick(float DeltaTime)
+{
+    if (Ball->GetPhysicsLinearVelocity() != FVector::ZeroVector)
+    {
+	SpringArm->RelativeRotation.Yaw = FVector::RightVector.CosineAngle2D(Ball->GetPhysicsLinearVelocity());
+    }
+}
+
 void ARolliePollieBall::MoveRight(float Val)
 {
-    SpringArm->RelativeRotation.Add(0, Val, 0);
+    // const FVector Torque = FVector(-Val * RollTorque, 0.f, 0.f);
+    // Ball->AddTorque(Torque);
+    Ball->AddTorque(-Val *
+    		    100/448 *
+    		    Ball->GetMass() *
+    		    FVector::DotProduct(Ball->GetPhysicsLinearVelocity(), Ball->GetPhysicsLinearVelocity()) *
+    		    GetForwardVector());
 }
 
 void ARolliePollieBall::MoveForward(float Val)
 {
     // const FVector Torque = FVector(0.f, Val * RollTorque, 0.f);
     // Ball->AddTorque(Torque);
-
-    Ball->AddTorque(Val * RollTorque * FVector::CrossProduct(FVector::UpVector,
-							     SpringArm->RelativeRotation.Vector()).GetUnsafeNormal());
+    if (Val > 0)
+    {
+    	Ball->AddTorque(Val *
+    			RollTorque *
+    		        GetForwardVector().RotateAngleAxis(90, FVector::UpVector));
+    }
     
 }
 
